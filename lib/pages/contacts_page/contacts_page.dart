@@ -34,6 +34,29 @@ class ContactsPage extends StatelessWidget {
     </html>
   ''';
 
+  final webController = WebViewController()
+    ..setJavaScriptMode(JavaScriptMode.unrestricted)
+    ..setNavigationDelegate(
+      NavigationDelegate(
+        onProgress: (int progress) {
+          // Update loading bar.
+        },
+        onPageStarted: (String url) {},
+        onPageFinished: (String url) {},
+        onHttpError: (HttpResponseError error) {},
+        onWebResourceError: (WebResourceError error) {},
+        onNavigationRequest: (NavigationRequest request) {
+          if (request.url.startsWith('https://www.youtube.com/')) {
+            return NavigationDecision.prevent;
+          }
+          return NavigationDecision.navigate;
+        },
+      ),
+    )
+    ..loadRequest(Uri.dataFromString(
+        googleMapUrl,
+        mimeType: 'text/html'));
+
   Future<void> _launchUrl(String url) async {
     final Uri uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
@@ -110,16 +133,14 @@ class ContactsPage extends StatelessWidget {
               ],
             ),
             SizedBox(height: 20),
-            SizedBox(
+            Container(
               height: 300,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: WebView(
-                  initialUrl:
-                      Uri.dataFromString(googleMapUrl, mimeType: 'text/html')
-                          .toString(),
-                  javascriptMode: JavascriptMode.unrestricted,
-                ),
+              clipBehavior: Clip.hardEdge,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: WebViewWidget(
+                controller: webController,
               ),
             ),
           ],
